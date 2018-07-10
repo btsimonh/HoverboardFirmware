@@ -34,7 +34,7 @@ struct Motor_setup{
 	int8_t TS_bitmask;
 
 	// hall pins
-	GPIO_TypeDef* HALL_PORT;
+	GPIO_TypeDef* HALL_PORTS[3];
 	int16_t HALL_PINS[3];
 	int8_t EXTI_IRQn;
 

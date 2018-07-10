@@ -57,7 +57,7 @@ C_SOURCES =  \
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f103xe.s
+startup.s
 
 
 ######################################
@@ -134,7 +134,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = stm32f103rctx_flash.ld
+LDSCRIPT = flash.ld
 
 # libraries
 LIBS = -lc -lm -lnosys

@@ -1,4 +1,7 @@
-# Hoverboard Motor Controller
+# Hoverboard Motor Controller for dual motherboards
+
+This is a fork of isabellesimova's firmware for hoverboards using 2 motherboards.
+** THIS IS ACTUALLY IN PROGRESS, DO NOT USE***
 
 This repository contains firmware to reflash the motor controller that comes with hoverboards. The new firmware allows us to control the wheels by commanding the speed (in rpm, rotations per minute) for each wheel via UART.
 
@@ -110,20 +113,48 @@ In response, you should see a bunch of INFO messages, as well as:
 ```
 stm32x unlocked.
 ```
-at some point in the messages. If you see the unlocked message, we're ready to move on. If you can't unlock it, you might need to find a device with windows OS, and use the ST Link tools to unlock it.
-
+at some point in the messages. If you see the unlocked message, we're ready to move on. If you can't unlock it, you might need to find a device with windows OS, and use the [ST Link tools](https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-programmers/stsw-link004.html) to unlock it:
+* Connect your StLink to your PC without connecting it to the board
+* Start STM32 ST-LINK Utility
+* Make sure your ST-Link is up-to-date: ST-LINK > Firmware update > Device connect > YES
+* Unplug it, connect it to the board and replug it
+* Go to Target > Option bytes...
+* Change Read protection to Disabled
+* Apply (an error message will show at the end, that's because it's not an official STM32 but it's working)
+* Check if it has worked with Target > Connect
 
 ## Flashing the firmware
 Now that everything is set up, it's time to actually flash some new firmware onto the device!
 
 #### Dependencies
-In order to compile the firmware you'll need to install the [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). You can download and install the toolchain appropriate for your development machine or use your favorite package manager. Below are instructions for using homebrew on MacOS.
+In order to compile the firmware you'll need to install the [GNU Embedded Toolchain for Arm](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). You can download and install the toolchain appropriate for your development machine or use your favorite package manager. Below are instructions for using homebrew on MacOS and Ubuntu / Debian.
 
 ##### MacOS
 ```
 $ brew tap PX4/homebrew-px4
 $ brew update
 $ brew install gcc-arm-none-eabi
+```
+
+##### Ubuntu / Debian
+```
+sudo apt-get remove gcc-arm-none-eabi binutils
+```
+
+###### Ubuntu > 16.04 or recent Debian
+```
+sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
+sudo apt-get update
+sudo apt-get install gcc-arm-embedded
+
+```
+
+###### Ubuntu < 16.04
+```
+sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded
+sudo apt-get update
+sudo apt-get install arm-gcc-none-eabi
+
 ```
 
 #### Calibration

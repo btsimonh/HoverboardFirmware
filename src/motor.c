@@ -17,7 +17,7 @@ extern volatile __IO struct UART uart;
 extern IWDG_HandleTypeDef hiwdg;
 
 struct Motor motor_L;
-struct Motor motor_R;
+//struct Motor motor_R;
 
 extern volatile int8_t status;
 extern volatile uint32_t last_rx_time;
@@ -87,10 +87,12 @@ void Motors_setup_and_init() {
 	motor_L.setup.htim_speed.Instance = TIM4;
 	motor_L.setup.TIM_SPEED_IRQn = TIM4_IRQn;
 
-	motor_L.setup.HALL_PORT = GPIOB;
-	motor_L.setup.HALL_PINS[0] = GPIO_PIN_5;
-	motor_L.setup.HALL_PINS[1] = GPIO_PIN_6;
-	motor_L.setup.HALL_PINS[2] = GPIO_PIN_7;
+	motor_L.setup.HALL_PORTS[0] = GPIOB;
+	motor_L.setup.HALL_PINS[0] = GPIO_PIN_11;
+    motor_L.setup.HALL_PORTS[1] = GPIOF;
+	motor_L.setup.HALL_PINS[1] = GPIO_PIN_1;
+    motor_L.setup.HALL_PORTS[2] = GPIOC;
+	motor_L.setup.HALL_PINS[2] = GPIO_PIN_14;
 	motor_L.setup.EXTI_IRQn = EXTI9_5_IRQn;
 
 	motor_L.setup.OFFSET_POS_HALL = L_POS_OFFSET;
@@ -98,48 +100,16 @@ void Motors_setup_and_init() {
 	motor_L.setup.OFFSET_DIR = L_WHEEL_DIR;
 
 	motor_L.setup.GPIO_LOW_PORTS[0] = GPIOA;
-	motor_L.setup.GPIO_LOW_CH_PINS[0] = GPIO_PIN_7;
-	motor_L.setup.GPIO_LOW_PORTS[1] = GPIOB;
-	motor_L.setup.GPIO_LOW_CH_PINS[1] = GPIO_PIN_0;
-	motor_L.setup.GPIO_LOW_PORTS[2] = GPIOB;
-	motor_L.setup.GPIO_LOW_CH_PINS[2] = GPIO_PIN_1;
+	motor_L.setup.GPIO_LOW_CH_PINS[0] = GPIO_PIN_8;
+	motor_L.setup.GPIO_LOW_PORTS[1] = GPIOA;
+	motor_L.setup.GPIO_LOW_CH_PINS[1] = GPIO_PIN_9;
+	motor_L.setup.GPIO_LOW_PORTS[2] = GPIOA;
+	motor_L.setup.GPIO_LOW_CH_PINS[2] = GPIO_PIN_10;
 
-	motor_L.setup.GPIO_HIGH_PORT = GPIOC;
-	motor_L.setup.GPIO_HIGH_CH_PINS = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8;
-
-
-	//motor R config
-	motor_R.setup.side = 'R';
-
-	motor_R.setup.htim_pwm.Instance = TIM1;
-	motor_R.setup.TIM_PWM_IRQn = TIM1_CC_IRQn;
-	motor_R.setup.htim_duty.Instance = TIM7;
-	motor_R.setup.TIM_DUTY_IRQn = TIM7_IRQn;
-	motor_R.setup.htim_speed.Instance = TIM3;
-	motor_R.setup.TIM_SPEED_IRQn = TIM3_IRQn;
-
-	motor_R.setup.HALL_PORT = GPIOC;
-	motor_R.setup.HALL_PINS[0] = GPIO_PIN_10;
-	motor_R.setup.HALL_PINS[1] = GPIO_PIN_11;
-	motor_R.setup.HALL_PINS[2] = GPIO_PIN_12;
-	motor_R.setup.EXTI_IRQn = EXTI15_10_IRQn;
-
-	motor_R.setup.OFFSET_POS_HALL = R_POS_OFFSET;
-	motor_R.setup.OFFSET_NEG_HALL = R_NEG_OFFSET;
-	motor_R.setup.OFFSET_DIR = R_WHEEL_DIR;
-
-	motor_R.setup.GPIO_LOW_PORTS[0] = GPIOB;
-	motor_R.setup.GPIO_LOW_CH_PINS[0] = GPIO_PIN_13;
-	motor_R.setup.GPIO_LOW_PORTS[1] = GPIOB;
-	motor_R.setup.GPIO_LOW_CH_PINS[1] = GPIO_PIN_14;
-	motor_R.setup.GPIO_LOW_PORTS[2] = GPIOB;
-	motor_R.setup.GPIO_LOW_CH_PINS[2] = GPIO_PIN_15;
-
-	motor_R.setup.GPIO_HIGH_PORT = GPIOA;
-	motor_R.setup.GPIO_HIGH_CH_PINS = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10;
+	motor_L.setup.GPIO_HIGH_PORT = GPIOB;
+	motor_L.setup.GPIO_HIGH_CH_PINS = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
 
 	motor_init(&motor_L);
-	motor_init(&motor_R);
 
 	//SETUP DUTY LOOKUP
 	int i;
@@ -175,14 +145,12 @@ void Motors_setup_and_init() {
  */
 void Motors_speeds(int16_t l_rpm, int16_t r_rpm) {
 	motor_speed(&motor_L, l_rpm);
-	motor_speed(&motor_R, r_rpm);
 }
 
 /* Stop both motors.
  */
 void Motors_stop() {
 	motor_stop(&motor_L);
-	motor_stop(&motor_R);
 }
 
 #ifdef CALIBRATION
@@ -191,9 +159,6 @@ void Motors_stop() {
 void Motors_calibrate() {
 	motor_calibrate(&motor_L, 1, 0);
 	motor_calibrate(&motor_L, -1, 0);
-
-	motor_calibrate(&motor_R, 1, 0);
-	motor_calibrate(&motor_R, -1, 0);
 }
 
 /* Calibrate a wheel by slowly increasing the pwm duty cycle until it moves just enough.
@@ -572,20 +537,24 @@ void motor_TIM_Speed_init(struct Motor *motor){
  * Enable the interrupts for the hall sensors.
  */
 void motor_HallSensor_init(struct Motor *motor){
-	GPIO_InitTypeDef GPIO_InitStruct;
-
-	/* GPIO Ports Clock Enable */
-	if (motor->setup.HALL_PORT == GPIOB)
-		__HAL_RCC_GPIOB_CLK_ENABLE();
-	else if (motor->setup.HALL_PORT == GPIOC)
-		__HAL_RCC_GPIOC_CLK_ENABLE();
-
 	/*Configure GPIO pins : HALL_LEFT_A_PIN HALL_LEFT_B_PIN HALL_LEFT_C_PIN */
-	GPIO_InitStruct.Pin = motor->setup.HALL_PINS[0]|motor->setup.HALL_PINS[1]|motor->setup.HALL_PINS[2];
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(motor->setup.HALL_PORT, &GPIO_InitStruct);
+    for( i = 0; i < 3; i = i + 1 ){
+        GPIO_InitTypeDef GPIO_InitStruct;
+
+        /* GPIO Ports Clock Enable */
+        if (motor->setup.HALL_PORTS[i] == GPIOB)
+            __HAL_RCC_GPIOB_CLK_ENABLE();
+        else if (motor->setup.HALL_PORTS[i] == GPIOC)
+            __HAL_RCC_GPIOC_CLK_ENABLE();
+        else if (motor->setup.HALL_PORTS[i] == GPIOF)
+            __HAL_RCC_GPIOF_CLK_ENABLE();
+        
+        GPIO_InitStruct.Pin = motor->setup.HALL_PINS[i];
+        GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+        GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        HAL_GPIO_Init(motor->setup.HALL_PORTS[i], &GPIO_InitStruct);
+    }
 
 	/* EXTI interrupt init*/
 	HAL_NVIC_SetPriority(motor->setup.EXTI_IRQn, 0, 0);
@@ -635,7 +604,8 @@ void motor_Set_PWM_ALL(struct Motor *motor, float value) {
 /* Gets the position deteremind by the hall sensors.
  */
 int motor_Get_Position(struct Motor *motor){
-	int pos = (motor->setup.HALL_PORT->IDR & (motor->setup.HALL_PINS[0]|motor->setup.HALL_PINS[1]|motor->setup.HALL_PINS[2])) / motor->setup.HALL_PINS[0];
+    /* IMPORTANT: TO FIX !!! */
+	int pos = (motor->setup.HALL_PORTS[0]->IDR & (motor->setup.HALL_PINS[0]|motor->setup.HALL_PINS[1]|motor->setup.HALL_PINS[2])) / motor->setup.HALL_PINS[0];
 	return HALL_LOOKUP[pos - 1];
 }
 
