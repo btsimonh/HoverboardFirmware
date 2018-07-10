@@ -26,7 +26,6 @@ void check_power();
 IWDG_HandleTypeDef hiwdg;
 #ifdef DEBUG
 extern struct ADC adc_L;
-extern struct ADC adc_R;
 #endif
 
 volatile uint32_t time, last_tx_time, last_rx_time, last_pwr_time;
@@ -47,11 +46,11 @@ int main(void)
 	MX_IWDG_Init();
 
 	// power everything
-	button_init();
+	/*button_init();*/
 	buzzer_init();
 	charging_init();
-	led_init();
-	led_set(1);
+	/*led_init();
+	led_set(1);*/
 
 	MX_USART2_UART_Init();
 	ADCs_setup_and_init();
@@ -119,10 +118,9 @@ void transmit_data() {
 
 #ifdef DEBUG
 	//TODO: These readings are not in amps, needs work.
-	float data_i_L, data_i_R;
+	float data_i_L;
 	data_i_L = GET_MOTOR_AMP(&adc_L);
-	data_i_R = GET_MOTOR_AMP(&adc_R);
-	sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_i_L, (int)data_i_R);
+	sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d]\n", status, (int)data_v, (int)data_i_L);
 #else
 	sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
 #endif

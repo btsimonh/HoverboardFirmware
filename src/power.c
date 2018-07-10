@@ -26,18 +26,18 @@ uint8_t is_charging(void){
 /************* Button *************/
 /* Initialize the on/off button and set up the interrupt to toggle the pin.
  */
-void button_init(void){
+/*void button_init(void){
 	GPIO_InitTypeDef GPIO_InitStruct;
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	/*Configure GPIO pin in: BUTTON_PIN */
+	/Configure GPIO pin in: BUTTON_PIN /
 	GPIO_InitStruct.Pin = BUTTON_PIN_IN;
 	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
 
-	/*Configure GPIO pin output Level */
+	/Configure GPIO pin output Level /
 	HAL_GPIO_WritePin(BUTTON_GPIO_PORT, BUTTON_PIN_OUT, GPIO_PIN_RESET);
 	GPIO_InitStruct.Pin = BUTTON_PIN_OUT;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
@@ -45,7 +45,7 @@ void button_init(void){
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
 
-	/* EXTI interrupt init*/
+	/ EXTI interrupt init/
 	HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 }
@@ -56,4 +56,4 @@ uint8_t button_pressed(void) {
 
 void button_toggle(void){
 	HAL_GPIO_TogglePin(BUTTON_GPIO_PORT, BUTTON_PIN_OUT);
-}
+}*/

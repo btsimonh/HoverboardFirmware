@@ -17,7 +17,6 @@ extern volatile __IO struct UART uart;
 extern IWDG_HandleTypeDef hiwdg;
 
 struct Motor motor_L;
-//struct Motor motor_R;
 
 extern volatile int8_t status;
 extern volatile uint32_t last_rx_time;
@@ -538,6 +537,7 @@ void motor_TIM_Speed_init(struct Motor *motor){
  */
 void motor_HallSensor_init(struct Motor *motor){
 	/*Configure GPIO pins : HALL_LEFT_A_PIN HALL_LEFT_B_PIN HALL_LEFT_C_PIN */
+	int i;
     for( i = 0; i < 3; i = i + 1 ){
         GPIO_InitTypeDef GPIO_InitStruct;
 

@@ -1,7 +1,8 @@
 # Hoverboard Motor Controller for dual motherboards
 
 This is a fork of isabellesimova's firmware for hoverboards using 2 motherboards.
-** THIS IS ACTUALLY IN PROGRESS, DO NOT USE***
+
+**THIS IS ACTUALLY IN PROGRESS, DO NOT USE**
 
 This repository contains firmware to reflash the motor controller that comes with hoverboards. The new firmware allows us to control the wheels by commanding the speed (in rpm, rotations per minute) for each wheel via UART.
 

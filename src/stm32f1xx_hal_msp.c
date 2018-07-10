@@ -36,7 +36,6 @@
 #include "adc.h"
 
 extern struct ADC adc_L;
-extern struct ADC adc_R;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
@@ -88,22 +87,20 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 	GPIO_InitTypeDef GPIO_InitStruct;
 	if(hadc->Instance==ADC1)
 	{
-		/* USER CODE BEGIN ADC1_MspInit 0 */
-
-		/* USER CODE END ADC1_MspInit 0 */
-		/* Peripheral clock enable */
+		/*
+		/ Peripheral clock enable /
 		__HAL_RCC_ADC1_CLK_ENABLE();
 
-		/**ADC1 GPIO Configuration
+		/ADC1 GPIO Configuration
 			PC0     ------> ADC1_IN10
 			PC1     ------> ADC1_IN11
 			PC2     ------> ADC1_IN12
-		 */
+		 /
 		GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2;  //GPIO_PIN_0
 		GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 		HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-		/* Peripheral DMA init*/
+		/ Peripheral DMA init/
 
 		adc_R.setup.hdma_adc.Instance = DMA1_Channel1;
 		adc_R.setup.hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -118,7 +115,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 			error_handler();
 		}
 
-		__HAL_LINKDMA(hadc,DMA_Handle,adc_R.setup.hdma_adc);
+		__HAL_LINKDMA(hadc,DMA_Handle,adc_R.setup.hdma_adc);*/
 
 		/* USER CODE BEGIN ADC1_MspInit 1 */
 

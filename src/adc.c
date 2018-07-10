@@ -1,6 +1,6 @@
 /** The ADCs measures the current / voltage of the motors and the batteries.
- * The left motor is hooked up to ADC3 Channel 10. (DMA2CH5, PC0)
- * The right motor is hooked up to ADC1 Channel 11. (DMA1CH1, PC1)
+ * The left motor is hooked up to ADC3 Channel 10. (DMA2CH5, PC0) -> TO FIX
+ * The right motor is hooked up to ADC1 Channel 11. (DMA1CH1, PC1) -> TO FIX
  * The battery ADC1 Channel 12. (DMA1CH1, PC2)
  * The channels are alternated in measurement.
  */
@@ -8,7 +8,7 @@
 #include "adc.h"
 
 struct ADC adc_L;
-struct ADC adc_R;
+struct ADC adc_BAT;
 
 int battery_voltage;
 
@@ -16,17 +16,17 @@ int battery_voltage;
 /* Configure both ADCs and set them up
  */
 void ADCs_setup_and_init() {
-	adc_R.setup.hadc.Instance = ADC1;
-	adc_R.setup.DMA_Channel_IRQn = DMA1_Channel1_IRQn;
-	adc_R.setup.channel = ADC_CHANNEL_11;
-	adc_R.setup.conversions = 2;
+	adc_BAT.setup.hadc.Instance = ADC1;
+	adc_BAT.setup.DMA_Channel_IRQn = DMA1_Channel1_IRQn;
+	adc_BAT.setup.channel = ADC_CHANNEL_11;
+	adc_BAT.setup.conversions = 2;
 
 	adc_L.setup.hadc.Instance = ADC3;
 	adc_L.setup.DMA_Channel_IRQn = DMA2_Channel4_5_IRQn;
 	adc_L.setup.channel = ADC_CHANNEL_10;
 	adc_L.setup.conversions = 1;
 
-	adc_init(&adc_R);
+	adc_init(&adc_BAT);
 	adc_init(&adc_L);
 }
 
@@ -115,7 +115,7 @@ float GET_MOTOR_AMP(struct ADC *adc) {
  */
 uint16_t ADC_BATTERY(void) {
 	uint16_t data = 0;
-	data = adc_R.data[1];
+	data = adc_BAT.data[1];
 	if (data == 0)
 		return ADC_BATTERY();
 	return data;

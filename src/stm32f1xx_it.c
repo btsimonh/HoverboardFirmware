@@ -43,7 +43,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern struct Motor motor_L;
-extern struct Motor motor_R;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 
@@ -247,7 +246,7 @@ void DMA1_Channel7_IRQHandler(void)
  */
 void EXTI1_IRQHandler(void)
 {
-	button_toggle();
+	//button_toggle(); -> TO FIX
 
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
 }
@@ -257,7 +256,7 @@ void EXTI1_IRQHandler(void)
  */
 void EXTI15_10_IRQHandler(void)
 {
-	if((__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_10) != RESET)||
+	/*if((__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_10) != RESET)||
 			(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_11) != RESET)||
 			(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_12) != RESET))
 	{
@@ -266,7 +265,7 @@ void EXTI15_10_IRQHandler(void)
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_10);
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_11);
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_12);
-	}
+	}*/
 }
 
 /**
@@ -291,8 +290,8 @@ void EXTI9_5_IRQHandler(void)
  */
 void TIM7_IRQHandler(void)
 {
-	HAL_TIM_IRQHandler(&(motor_R.setup.htim_duty));
-	Duty_ISR_Callback(&motor_R);
+	/*HAL_TIM_IRQHandler(&(motor_R.setup.htim_duty));
+	Duty_ISR_Callback(&motor_R);*/
 }
 
 /**
@@ -309,8 +308,8 @@ void TIM6_IRQHandler(void)
  */
 void TIM3_IRQHandler(void)
 {
-	HAL_TIM_IRQHandler(&(motor_R.setup.htim_speed));
-	Speed_ISR_Callback(&motor_R);
+	/*HAL_TIM_IRQHandler(&(motor_R.setup.htim_speed));
+	Speed_ISR_Callback(&motor_R);*/
 }
 
 /**
