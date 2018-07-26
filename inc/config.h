@@ -14,11 +14,11 @@
  * You'll need to have UART (9600 baud rate) set up to see what the st microcontroller
  * is outputting.
  */
-//#define CALIBRATION //comment out when not in use
+#define CALIBRATION //comment out when not in use
 
 /* Use DEBUG mode to send extra data via UART (such as the motor currents)
  */
-//#define DEBUG //comment out when not in use
+#define DEBUG //comment out when not in use
 /* Disable ADC debuging when in DEBUG mode, temporary fix for issue #2
    https://github.com/isabellesimova/HoverboardFirmware/issues/2
 */
