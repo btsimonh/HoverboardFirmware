@@ -80,6 +80,10 @@ void HardFault_Handler(void)
 	/* USER CODE BEGIN HardFault_IRQn 0 */
 	Motors_stop();
 
+	#ifdef BUZZER_MOTORS_DEBUG
+	buzzer_two_beeps();
+	#endif
+
 	/* USER CODE END HardFault_IRQn 0 */
 	while (1)
 	{
@@ -98,6 +102,10 @@ void MemManage_Handler(void)
 	/* USER CODE BEGIN MemoryManagement_IRQn 0 */
 	Motors_stop();
 
+	#ifdef BUZZER_MOTORS_DEBUG
+	buzzer_one_beep();
+	#endif
+
 	/* USER CODE END MemoryManagement_IRQn 0 */
 	while (1)
 	{
@@ -115,6 +123,10 @@ void BusFault_Handler(void)
 	/* USER CODE BEGIN BusFault_IRQn 0 */
 	Motors_stop();
 
+	#ifdef BUZZER_MOTORS_DEBUG
+	buzzer_three_beeps();
+	#endif
+
 	/* USER CODE END BusFault_IRQn 0 */
 	while (1)
 	{
@@ -131,6 +143,10 @@ void UsageFault_Handler(void)
 {
 	/* USER CODE BEGIN UsageFault_IRQn 0 */
 	Motors_stop();
+
+	#ifdef BUZZER_MOTORS_DEBUG
+	buzzer_long_beep();
+	#endif
 
 	/* USER CODE END UsageFault_IRQn 0 */
 	while (1)
@@ -248,8 +264,11 @@ void DMA1_Channel7_IRQHandler(void)
 void EXTI1_IRQHandler(void)
 {
 	button_toggle();
-
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
+
+	#ifdef BUZZER_DEBUG
+	buzzer_short_beep();
+	#endif
 }
 
 /**

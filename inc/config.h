@@ -24,9 +24,15 @@
 */
 #define DEBUG_NO_ADC //comment out when not in use
 
-/* One beep at start
+/* Use buzzer to debug
  */
-//#define BUZZER_START_DEBUG //comment out when not in use
+//#define BUZZER_DEBUG //comment out when not in use
+/* OR use buzzer to debug motors stopping
+ */
+//#define BUZZER_MOTORS_DEBUG //comment out when not in use
+/* OR use buzzer to debug starting
+ */
+#define BUZZER_START_DEBUG //comment out when not in use
 
 /* Pick a mode for control - trapezoidal or sinusoidal. Trapezoidal is simpler
  * and works with less logic. Sinusoidal is more complex but works better at low speeds.

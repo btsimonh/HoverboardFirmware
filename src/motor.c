@@ -181,6 +181,10 @@ void Motors_speeds(int16_t l_rpm, int16_t r_rpm) {
 /* Stop both motors.
  */
 void Motors_stop() {
+	#ifdef BUZZER_DEBUG
+	buzzer_one_beep();
+	#endif
+
 	motor_stop(&motor_L);
 	motor_stop(&motor_R);
 }

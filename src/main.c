@@ -153,7 +153,7 @@ void check_power() {
 	if (GET_BATTERY_VOLT() < 32) {
 		SET_ERROR_BIT(status, STATUS_LOW_BATTERY);
 		Motors_stop();
-		buzzer_short_beep();
+		buzzer_three_beeps();
 	} else {
 		CLR_ERROR_BIT(status, STATUS_LOW_BATTERY);
 	}
@@ -165,6 +165,10 @@ void check_power() {
 	if (is_charging()) {
 		SET_ERROR_BIT(status, STATUS_IS_CHARGING);
 		Motors_stop();
+
+		#ifdef BUZZER_DEBUG
+		buzzer_long_beep();
+		#endif
 	} else {
 		CLR_ERROR_BIT(status, STATUS_IS_CHARGING);
 	}
@@ -253,6 +257,10 @@ void error_handler(void)
 	/* USER CODE BEGIN error_handler */
 	/* User can add his own implementation to report the HAL error return state */
 	Motors_stop();
+
+	#ifdef BUZZER_DEBUG
+	buzzer_two_beeps();
+	#endif
 
 	while(1)
 	{
