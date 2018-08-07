@@ -558,7 +558,7 @@ void motor_TIM_Speed_init(struct Motor *motor){
 		__HAL_RCC_TIM4_CLK_ENABLE();
 
 	motor->setup.htim_speed.Instance->CR1 = motor->setup.htim_speed.Instance->CR1 | TIM_CR1_ARPE_Msk;
-	motor->setup.htim_speed.Init.Prescaler = (uint32_t) ((SystemCoreClock  / 1000000) - 1); // instructions per microsecond
+	motor->setup.htim_speed.Init.Prescaler = (uint32_t) ((SystemCoreClock  / 1000000) - 1); // instructions per microsecond ((SystemCoreClock  / 1000000) - 1)
 	motor->setup.htim_speed.Init.Period = motor->speed - 1;
 	motor->setup.htim_speed.Init.ClockDivision = 0;
 	motor->setup.htim_speed.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -637,6 +637,12 @@ void motor_Set_PWM_ALL(struct Motor *motor, float value) {
 int motor_Get_Position(struct Motor *motor){
 	int pos = (motor->setup.HALL_PORT->IDR & (motor->setup.HALL_PINS[0]|motor->setup.HALL_PINS[1]|motor->setup.HALL_PINS[2])) / motor->setup.HALL_PINS[0];
 	return HALL_LOOKUP[pos - 1];
+}
+
+/* Gets the position deteremind by the hall sensors.
+ */
+int motor_Get_actual_Position(struct Motor *motor){
+	return motor->position;
 }
 
 /* This is the interrupt function for whenever the hall sensor readings change.

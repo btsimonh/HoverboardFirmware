@@ -102,6 +102,7 @@ void motor_Set_PWM(struct Motor *motor, uint8_t channel, float value);
 void motor_Set_PWM_ALL(struct Motor *motor, float value);
 
 int motor_Get_Position(struct Motor *motor);
+int motor_Get_actual_Position(struct Motor *motor);
 
 void HALL_ISR_Callback(struct Motor *motor);
 void Duty_ISR_Callback(struct Motor *motor);

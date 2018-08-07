@@ -29,6 +29,11 @@ extern struct ADC adc_L;
 extern struct ADC adc_R;
 #endif
 
+#ifdef DEBUG_POSITION
+extern struct Motor motor_L;
+extern struct Motor motor_R;
+#endif
+
 volatile uint32_t time, last_tx_time, last_rx_time, last_pwr_time;
 volatile int8_t status;
 int16_t speeds[2];
@@ -129,7 +134,14 @@ void transmit_data() {
 	data_i_R = GET_MOTOR_AMP(&adc_R);
 	sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_i_L, (int)data_i_R);
 #else
-	sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
+	#ifdef DEBUG_POSITION
+		float data_p_L, data_p_R;
+		data_p_L = motor_Get_actual_Position(&motor_L);
+		data_p_R = motor_Get_actual_Position(&motor_R);
+		sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_p_L, (int)data_p_R);
+	#else
+		sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
+	#endif
 #endif
 
 	if (Uart_is_TX_free()) {

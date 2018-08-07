@@ -69,28 +69,28 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-BINPATH = /usr/local/bin
-PREFIX = arm-none-eabi-
-CC = $(BINPATH)/$(PREFIX)gcc
-AS = $(BINPATH)/$(PREFIX)gcc -x assembler-with-cpp
-CP = $(BINPATH)/$(PREFIX)objcopy
-AR = $(BINPATH)/$(PREFIX)ar
-SZ = $(BINPATH)/$(PREFIX)size
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
+#BINPATH = /usr/local/bin
+#PREFIX = arm-none-eabi-
+#CC = $(BINPATH)/$(PREFIX)gcc
+#AS = $(BINPATH)/$(PREFIX)gcc -x assembler-with-cpp
+#CP = $(BINPATH)/$(PREFIX)objcopy
+#AR = $(BINPATH)/$(PREFIX)ar
+#SZ = $(BINPATH)/$(PREFIX)size
+#HEX = $(CP) -O ihex
+#BIN = $(CP) -O binary -S
 
 #######################################
 # for windows, use:
 #######################################
-# BINPATH = "C:\Program Files (x86)\GNU Tools Arm Embedded\7 2018-q2-update\bin
-# PREFIX = arm-none-eabi-
-# CC = $(BINPATH)/$(PREFIX)gcc"
-# AS = $(BINPATH)/$(PREFIX)gcc" -x assembler-with-cpp
-# CP = $(BINPATH)/$(PREFIX)objcopy"
-# AR = $(BINPATH)/$(PREFIX)ar"
-# SZ = $(BINPATH)/$(PREFIX)size"
-# HEX = $(CP) -O ihex
-# BIN = $(CP) -O binary -S
+ BINPATH = "C:\Program Files (x86)\GNU Tools Arm Embedded\7 2018-q2-update\bin
+ PREFIX = arm-none-eabi-
+ CC = $(BINPATH)/$(PREFIX)gcc"
+ AS = $(BINPATH)/$(PREFIX)gcc" -x assembler-with-cpp
+ CP = $(BINPATH)/$(PREFIX)objcopy"
+ AR = $(BINPATH)/$(PREFIX)ar"
+ SZ = $(BINPATH)/$(PREFIX)size"
+ HEX = $(CP) -O ihex
+ BIN = $(CP) -O binary -S
  
 #######################################
 # CFLAGS
