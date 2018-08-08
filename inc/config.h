@@ -76,7 +76,7 @@
  * The frequencies for various tasks - power hcecks, UART communication, heart beat check.
  */
 #define POWER_CHECK_PERIOD 5000 //ms
-#define TX_WAIT_PERIOD	  250   //ms
+#define TX_WAIT_PERIOD	  50   //250 ms
 #define RX_WAIT_PERIOD    50    //ms
 #define HEARTBEAT_PERIOD  500   //ms
 

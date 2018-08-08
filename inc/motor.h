@@ -55,6 +55,7 @@ struct Motor {
 	struct Motor_setup setup;
 	volatile __IO uint32_t uwPeriodValue;
 	volatile __IO uint8_t position; //hall
+	volatile __IO float absposition; //hall in degrees
 	volatile __IO uint8_t next_position; //hall
 
 	volatile __IO float pwm;
@@ -102,7 +103,7 @@ void motor_Set_PWM(struct Motor *motor, uint8_t channel, float value);
 void motor_Set_PWM_ALL(struct Motor *motor, float value);
 
 int motor_Get_Position(struct Motor *motor);
-int motor_Get_actual_Position(struct Motor *motor);
+float motor_Get_Abs_Position(struct Motor *motor);
 
 void HALL_ISR_Callback(struct Motor *motor);
 void Duty_ISR_Callback(struct Motor *motor);

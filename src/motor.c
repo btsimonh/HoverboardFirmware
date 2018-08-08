@@ -41,6 +41,8 @@ static const uint32_t TIM_CHANNELS[3] = {
 		TIM_CHANNEL_3
 };
 
+//volatile int oldhall = 0;
+
 #if CONTROL_METHOD == SINUSOIDAL_CONTROL
 static const float DUTY_SINUSOIDAL[96]= {
 		0.86328125, 0.89453125, 0.921875, 0.9453125, 0.96484375, 0.9765625, 0.98828125, 0.99609375,
@@ -639,10 +641,10 @@ int motor_Get_Position(struct Motor *motor){
 	return HALL_LOOKUP[pos - 1];
 }
 
-/* Gets the position deteremind by the hall sensors.
+/* Gets the position deteremind by the hall sensors in degrees.
  */
-int motor_Get_actual_Position(struct Motor *motor){
-	return motor->position;
+float motor_Get_Abs_Position(struct Motor *motor){
+	return motor->absposition;
 }
 
 /* This is the interrupt function for whenever the hall sensor readings change.
@@ -692,15 +694,28 @@ void Speed_ISR_Callback(struct Motor *motor){
 		CLR_ERROR_BIT(status, STATUS_HEARTBEAT_MISSING);
 	}
 
-	if (motor->stop) {
-		return;
-	}
+	//oldhall = motor->position;
 
 	static int newPos;
 	if (motor->direction > 0) {
 		newPos = in_range(motor_Get_Position(motor) + motor->setup.OFFSET_POS_HALL);
 	} else {
 		newPos = in_range(motor_Get_Position(motor) + motor->setup.OFFSET_NEG_HALL);
+	}
+
+	if (motor->position != newPos){
+		if (motor->position == 0 && newPos > 3){
+			motor->absposition -= 1;
+		}else if (motor->position > 3 && newPos == 0){
+			motor->absposition += 1;
+		}else{
+			motor->absposition += newPos - motor->position;
+		}
+	}
+
+	if (motor->stop) {
+		motor->position = newPos;
+		return;
 	}
 
 	if (newPos == motor->position) {

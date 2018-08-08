@@ -136,8 +136,8 @@ void transmit_data() {
 #else
 	#ifdef DEBUG_POSITION
 		float data_p_L, data_p_R;
-		data_p_L = motor_Get_actual_Position(&motor_L);
-		data_p_R = motor_Get_actual_Position(&motor_R);
+		data_p_L = motor_Get_Abs_Position(&motor_L);
+		data_p_R = motor_Get_Abs_Position(&motor_R);
 		sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_p_L, (int)data_p_R);
 	#else
 		sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
