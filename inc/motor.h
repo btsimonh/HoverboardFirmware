@@ -65,8 +65,10 @@ struct Motor {
 	volatile __IO int8_t direction; //+1 or -1
 	volatile __IO uint8_t stop; // 0 or 1
 
+	#if POWER_METHOD != PID_POWER
 	volatile __IO float pos_increment; // 1 or 0.1
 	volatile __IO float neg_increment; // 2 or 0.1
+	#endif
 
 	// pwm lines: +1, 0, or -1
 	volatile __IO uint32_t PWM_DUTIES[3];
@@ -118,9 +120,11 @@ void HALL_ISR_Callback(struct Motor *motor);
 void Duty_ISR_Callback(struct Motor *motor);
 void Speed_ISR_Callback(struct Motor *motor);
 
+#if POWER_METHOD == PID_POWER
 double ComputePID(struct Motor *motor, double Input);
 double motor_Get_PID_Value(struct Motor *motor);
 void SetPosition(struct Motor *motor, double Setpoint);
+#endif
 
 extern void error_handler(void);
 

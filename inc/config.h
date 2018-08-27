@@ -36,7 +36,11 @@
  */
 #define TRAPEZOIDAL_CONTROL 0
 #define SINUSOIDAL_CONTROL 1
-#define CONTROL_METHOD TRAPEZOIDAL_CONTROL
+#define CONTROL_METHOD SINUSOIDAL_CONTROL
+#define SIMPLE_POWER 0
+#define PID_POWER 1
+#define POWER_METHOD PID_POWER
+
 
 
 
@@ -64,9 +68,11 @@
 
 
 /* PID Control */
-#define PIDKP               1
-#define PIDKI               0 //5
-#define PIDKD               0 //1
+#if POWER_METHOD == PID_POWER
+    #define PIDKP               1
+    #define PIDKI               0 //5
+    #define PIDKD               0 //1
+#endif
 
 
 

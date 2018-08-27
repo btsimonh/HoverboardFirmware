@@ -77,6 +77,9 @@ int main(void)
 	last_tx_time = HAL_GetTick();
 	last_pwr_time = HAL_GetTick();
 
+	SetPosition(&motor_L, 100);
+	SetPosition(&motor_R, 100);
+
 	while (1) {
 		time = HAL_GetTick();
 
@@ -114,9 +117,9 @@ void receive_data() {
 	int uart_rx_status = Uart_RX_process();
 	if (uart_rx_status == 1) {
 		last_rx_time = HAL_GetTick();
-		//Motors_speeds(speeds[0], speeds[1]);
-		SetPosition(&motor_L, speeds[0]);
-		SetPosition(&motor_R, speeds[1]);
+		Motors_speeds(speeds[0], speeds[1]);
+		//SetPosition(&motor_L, speeds[0]);
+		//SetPosition(&motor_R, speeds[1]);
 	}
 }
 
@@ -137,8 +140,6 @@ void transmit_data() {
 #else
 	#ifdef DEBUG_POSITION
 		float data_p_L, data_p_R;
-		//data_p_L = motor_Get_PID_Value(&motor_L);
-		//data_p_R = motor_Get_PID_Value(&motor_R);
 		data_p_L = motor_Get_Abs_Position(&motor_L);
 		data_p_R = motor_Get_Abs_Position(&motor_R);
 		sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_p_L, (int)data_p_R);

@@ -169,8 +169,8 @@ void Motors_setup_and_init() {
 
 		//ascending
 		BASE_DUTY_LOOKUP[5][i] = 0;
-	}
 #endif
+	}
 }
 
 /* Set the speed for both motors.
@@ -298,8 +298,10 @@ void motor_init(struct Motor *motor){
 
 	motor->pwm = 0;
 
+	#if POWER_METHOD != PID_POWER
 	motor->pos_increment = 0;
 	motor->neg_increment = 0;
+	#endif
 
 
 	motor_TIM_PWM_init(motor);
@@ -371,13 +373,15 @@ void motor_speed(struct Motor *motor, int16_t rpm) {
 	}
 
 	if (old_speed != motor->speed) {
-		if (old_speed < motor->speed) {
-			motor->pos_increment = 1;
-			motor->neg_increment = 0.1;
-		} else if (old_speed > motor->speed) {
-			motor->pos_increment = 0.1;
-			motor->neg_increment = 2;
-		}
+		#if POWER_METHOD != PID_POWER
+			if (old_speed < motor->speed) {
+				motor->pos_increment = 1;
+				motor->neg_increment = 0.1;
+			} else if (old_speed > motor->speed) {
+				motor->pos_increment = 0.1;
+				motor->neg_increment = 2;
+			}
+		#endif
 
 		// set the register of the next thing
 		__HAL_TIM_SET_AUTORELOAD(&(motor->setup.htim_speed), motor->speed - 1);
@@ -713,18 +717,20 @@ void Speed_ISR_Callback(struct Motor *motor){
 		}
 	}
 
-	motor_speed(motor, ComputePID(motor, motor->absposition));
-
 	if (motor->stop) {
 		motor->position = newPos;
 		return;
 	}
 
-	if (newPos == motor->position) {
-		motor_pwm(motor, motor->pwm + motor->pos_increment);
-	} else if (in_range(newPos - motor->position - motor->direction) != 0){
-		motor_pwm(motor, motor->pwm - motor->neg_increment);
-	}
+	#if POWER_METHOD == PID_POWER
+		motor_pwm(motor, ComputePID(motor, motor->absposition));
+	#elif CONTROL_METHOD == SINUSOIDAL_CONTROL || CONTROL_METHOD == TRAPEZOIDAL_CONTROL
+		if (newPos == motor->position) {
+			motor_pwm(motor, motor->pwm + motor->pos_increment);
+		} else if (in_range(newPos - motor->position - motor->direction) != 0){
+			motor_pwm(motor, motor->pwm - motor->neg_increment);
+		}
+	#endif
 
 	motor->position = newPos;
 
@@ -761,6 +767,8 @@ void Speed_ISR_Callback(struct Motor *motor){
 	__HAL_TIM_SET_AUTORELOAD(&(motor->setup.htim_duty), (motor->speed >> 4) - 1);
 }
 
+#if POWER_METHOD == PID_POWER
+
 double ComputePID(struct Motor *motor, double Input)
 {
    /*How long since we last calculated*/
@@ -790,3 +798,5 @@ void SetPosition(struct Motor *motor, double Setpoint)
 {
    motor->Setpoint = Setpoint;
 }
+
+#endif
