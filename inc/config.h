@@ -22,7 +22,10 @@
 /* Disable ADC debuging when in DEBUG mode, temporary fix for issue #2
    https://github.com/isabellesimova/HoverboardFirmware/issues/2
 */
-//#define DEBUG_NO_ADC //comment out when not in use
+#define DEBUG_NO_ADC //comment out when not in use
+/* Send position
+*/
+#define DEBUG_POSITION //comment out when not in use
 
 /* One beep at start
  */
@@ -60,6 +63,10 @@
 #define R_WHEEL_DIR 	   -1
 
 
+/* PID Control */
+#define PIDKP               1
+#define PIDKI               0 //5
+#define PIDKD               0 //1
 
 
 
@@ -73,7 +80,7 @@
  * The frequencies for various tasks - power hcecks, UART communication, heart beat check.
  */
 #define POWER_CHECK_PERIOD 5000 //ms
-#define TX_WAIT_PERIOD	  250   //ms
+#define TX_WAIT_PERIOD	  50   //250 ms
 #define RX_WAIT_PERIOD    50    //ms
 #define HEARTBEAT_PERIOD  500   //ms
 

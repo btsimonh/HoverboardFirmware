@@ -29,6 +29,11 @@ extern struct ADC adc_L;
 extern struct ADC adc_R;
 #endif
 
+#ifdef DEBUG_POSITION
+extern struct Motor motor_L;
+extern struct Motor motor_R;
+#endif
+
 volatile uint32_t time, last_tx_time, last_rx_time, last_pwr_time;
 volatile int8_t status;
 int16_t speeds[2];
@@ -39,6 +44,7 @@ int16_t speeds[2];
  */
 int main(void)
 {
+
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
 	/* Configure the system clock */
@@ -108,7 +114,9 @@ void receive_data() {
 	int uart_rx_status = Uart_RX_process();
 	if (uart_rx_status == 1) {
 		last_rx_time = HAL_GetTick();
-		Motors_speeds(speeds[0], speeds[1]);
+		//Motors_speeds(speeds[0], speeds[1]);
+		SetPosition(&motor_L, speeds[0]);
+		SetPosition(&motor_R, speeds[1]);
 	}
 }
 
@@ -127,7 +135,16 @@ void transmit_data() {
 	data_i_R = GET_MOTOR_AMP(&adc_R);
 	sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_i_L, (int)data_i_R);
 #else
-	sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
+	#ifdef DEBUG_POSITION
+		float data_p_L, data_p_R;
+		//data_p_L = motor_Get_PID_Value(&motor_L);
+		//data_p_R = motor_Get_PID_Value(&motor_R);
+		data_p_L = motor_Get_Abs_Position(&motor_L);
+		data_p_R = motor_Get_Abs_Position(&motor_R);
+		sprintf((char *)&uart.TX_buffer[0],"[%d, %d, %d, %d]\n", status, (int)data_v, (int)data_p_L, (int)data_p_R);
+	#else
+		sprintf((char *)&uart.TX_buffer[0],"[%d, %d]\n", status, (int)data_v);
+	#endif
 #endif
 
 	if (Uart_is_TX_free()) {

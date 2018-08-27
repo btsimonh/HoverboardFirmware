@@ -6,6 +6,7 @@
  */
 
 #include "adc.h"
+#include "config.h"
 
 struct ADC adc_L;
 struct ADC adc_R;

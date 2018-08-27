@@ -41,6 +41,8 @@ static const uint32_t TIM_CHANNELS[3] = {
 		TIM_CHANNEL_3
 };
 
+//volatile int oldhall = 0;
+
 #if CONTROL_METHOD == SINUSOIDAL_CONTROL
 static const float DUTY_SINUSOIDAL[96]= {
 		0.86328125, 0.89453125, 0.921875, 0.9453125, 0.96484375, 0.9765625, 0.98828125, 0.99609375,
@@ -167,8 +169,8 @@ void Motors_setup_and_init() {
 
 		//ascending
 		BASE_DUTY_LOOKUP[5][i] = 0;
-#endif
 	}
+#endif
 }
 
 /* Set the speed for both motors.
@@ -558,7 +560,7 @@ void motor_TIM_Speed_init(struct Motor *motor){
 		__HAL_RCC_TIM4_CLK_ENABLE();
 
 	motor->setup.htim_speed.Instance->CR1 = motor->setup.htim_speed.Instance->CR1 | TIM_CR1_ARPE_Msk;
-	motor->setup.htim_speed.Init.Prescaler = (uint32_t) ((SystemCoreClock  / 1000000) - 1); // instructions per microsecond
+	motor->setup.htim_speed.Init.Prescaler = (uint32_t) ((SystemCoreClock  / 1000000) - 1); // instructions per microsecond ((SystemCoreClock  / 1000000) - 1)
 	motor->setup.htim_speed.Init.Period = motor->speed - 1;
 	motor->setup.htim_speed.Init.ClockDivision = 0;
 	motor->setup.htim_speed.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -639,10 +641,16 @@ int motor_Get_Position(struct Motor *motor){
 	return HALL_LOOKUP[pos - 1];
 }
 
+/* Gets the position deteremind by the hall sensors in degrees.
+ */
+float motor_Get_Abs_Position(struct Motor *motor){
+	return motor->absposition;
+}
+
 /* This is the interrupt function for whenever the hall sensor readings change.
  */
 void HALL_ISR_Callback(struct Motor *motor){
-
+	
 }
 
 /* This is the interrupt function to change the duty cycle 16x per commutation phase.
@@ -686,15 +694,30 @@ void Speed_ISR_Callback(struct Motor *motor){
 		CLR_ERROR_BIT(status, STATUS_HEARTBEAT_MISSING);
 	}
 
-	if (motor->stop) {
-		return;
-	}
+	//oldhall = motor->position;
 
 	static int newPos;
 	if (motor->direction > 0) {
 		newPos = in_range(motor_Get_Position(motor) + motor->setup.OFFSET_POS_HALL);
 	} else {
 		newPos = in_range(motor_Get_Position(motor) + motor->setup.OFFSET_NEG_HALL);
+	}
+
+	if (motor->position != newPos){
+		if (motor->position == 0 && newPos > 3){
+			motor->absposition -= 1;
+		}else if (motor->position > 3 && newPos == 0){
+			motor->absposition += 1;
+		}else{
+			motor->absposition += newPos - motor->position;
+		}
+	}
+
+	motor_speed(motor, ComputePID(motor, motor->absposition));
+
+	if (motor->stop) {
+		motor->position = newPos;
+		return;
 	}
 
 	if (newPos == motor->position) {
@@ -736,4 +759,34 @@ void Speed_ISR_Callback(struct Motor *motor){
 	motor_Low_ON(motor, REVERSE_HALL_LOOKUP[motor->next_position][2]);
 
 	__HAL_TIM_SET_AUTORELOAD(&(motor->setup.htim_duty), (motor->speed >> 4) - 1);
+}
+
+double ComputePID(struct Motor *motor, double Input)
+{
+   /*How long since we last calculated*/
+   unsigned long now = HAL_GetTick();
+   double timeChange = (double)(now - motor->lastTime);
+  
+   /*Compute all the working error variables*/
+   double error = motor->Setpoint - Input;
+   motor->errSum += (error * timeChange);
+   double dErr = (error - motor->lastErr) / timeChange;
+  
+   /*Compute PID Output*/
+   double Output = PIDKP * error + PIDKI * motor->errSum + PIDKD * dErr;
+  
+   /*Remember some variables for next time*/
+   motor->lastErr = error;
+   motor->lastTime = now;
+
+   return Output;
+}
+
+double motor_Get_PID_Value(struct Motor *motor){
+	return motor->lastErr;
+}
+
+void SetPosition(struct Motor *motor, double Setpoint)
+{
+   motor->Setpoint = Setpoint;
 }

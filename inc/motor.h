@@ -10,7 +10,8 @@ extern "C" {
 
 #define PWM_MOTOR 25000			//PWM frequency in Hertz
 #define MIN_SPEED 11			//rotations per minute
-#define MAX_SPEED 360
+#define MAX_SPEED 70
+#define MAX_PWM 1000000*60/(WHEEL_HALL_COUNTS*MAX_SPEED)
 #define NUM_PHASES 6
 #define DUTY_STEPS 16
 #define PI 3.14159265358
@@ -55,6 +56,7 @@ struct Motor {
 	struct Motor_setup setup;
 	volatile __IO uint32_t uwPeriodValue;
 	volatile __IO uint8_t position; //hall
+	volatile __IO float absposition; //hall in degrees
 	volatile __IO uint8_t next_position; //hall
 
 	volatile __IO float pwm;
@@ -71,6 +73,14 @@ struct Motor {
 	volatile __IO uint32_t DUTY_LOOKUP[6][DUTY_STEPS];
 
 	volatile __IO int16_t timer_duty_cnt;
+
+	volatile __IO unsigned long lastTime;
+	volatile __IO double errSum;
+	volatile __IO double lastErr;
+    /*volatile __IO double kp;
+	volatile __IO double ki;
+	volatile __IO double kd;*/
+	volatile __IO double Setpoint;
 };
 
 // PUBLIC
@@ -102,10 +112,15 @@ void motor_Set_PWM(struct Motor *motor, uint8_t channel, float value);
 void motor_Set_PWM_ALL(struct Motor *motor, float value);
 
 int motor_Get_Position(struct Motor *motor);
+float motor_Get_Abs_Position(struct Motor *motor);
 
 void HALL_ISR_Callback(struct Motor *motor);
 void Duty_ISR_Callback(struct Motor *motor);
 void Speed_ISR_Callback(struct Motor *motor);
+
+double ComputePID(struct Motor *motor, double Input);
+double motor_Get_PID_Value(struct Motor *motor);
+void SetPosition(struct Motor *motor, double Setpoint);
 
 extern void error_handler(void);
 
