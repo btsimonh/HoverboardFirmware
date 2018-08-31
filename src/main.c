@@ -7,6 +7,9 @@
 #include "uart.h"
 #include "adc.h"
 #include "motor.h"
+#include "sensorcoms.h"
+#include "protocol.h"
+#include "softwareserial.h"
 
 
 extern volatile __IO struct UART uart;
@@ -44,6 +47,7 @@ int16_t speeds[2];
  */
 int main(void)
 {
+	int power_pressed = 0;
 
 	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
@@ -59,12 +63,32 @@ int main(void)
 	buzzer_one_beep();
 	#endif
 	charging_init();
+	power_pressed = button_pressed();
+	set_power_on(1);
 	led_init();
 	led_set(1);
 
+#ifndef SOFTWARE_SERIAL
 	MX_USART2_UART_Init();
+#endif
+
+#ifdef INCLUDE_PROTOCOL
+	protocol_init();
+#endif
+
+#ifdef READ_SENSOR
+	sensor_USART_init();
+	sensor_set_flash(0, 2);
+	sensor_set_colour(1, SENSOR_COLOUR_GREEN);
+#endif
+
+
+
 	ADCs_setup_and_init();
 	Motors_setup_and_init();
+#ifdef SOFTWARE_SERIAL
+	SoftwareSerialInit();
+#endif
 
 #ifdef CALIBRATION
 
@@ -77,27 +101,39 @@ int main(void)
 	last_tx_time = HAL_GetTick();
 	last_pwr_time = HAL_GetTick();
 
-	SetPosition(&motor_L, 100);
-	SetPosition(&motor_R, 100);
+	//SetPosition(&motor_L, 100);
+	//SetPosition(&motor_R, 100);
 
 	while (1) {
 		time = HAL_GetTick();
 
 		// get the commands every RX_WAIT_PERIOD ms
-		if (time - last_rx_time > RX_WAIT_PERIOD) {
-			if (!CHK_ERROR_BIT(status, STATUS_LOW_BATTERY) && !CHK_ERROR_BIT(status, STATUS_IS_CHARGING)) {
+		if ((time - last_rx_time) > RX_WAIT_PERIOD) {
+			//if (!CHK_ERROR_BIT(status, STATUS_LOW_BATTERY) && !CHK_ERROR_BIT(status, STATUS_IS_CHARGING)) {
 				receive_data();
-			}
+			//}
 		}
 
 		// transmit status/info every TX_WAIT_PERIOD ms
-		if (time - last_tx_time > TX_WAIT_PERIOD) {
+		if ((time - last_tx_time) > TX_WAIT_PERIOD) {
 			transmit_data();
 		}
 
 		// check to make sure power levels are ok
-		if (time - last_pwr_time > POWER_CHECK_PERIOD) {
-			check_power();
+		if ((time - last_pwr_time) > POWER_CHECK_PERIOD) {
+			//check_power();
+		}
+
+		if (button_pressed()){
+			// if held from start
+			if (power_pressed){
+
+			} else {
+				if (!is_charging())
+					set_power_on(0);
+			}
+		} else {
+			power_pressed = 0;
 		}
 
 		HAL_IWDG_Refresh(&hiwdg);   //819mS
@@ -114,6 +150,7 @@ int main(void)
  * Update the motors to the new speeds.
  */
 void receive_data() {
+#ifndef SOFTWARE_SERIAL
 	int uart_rx_status = Uart_RX_process();
 	if (uart_rx_status == 1) {
 		last_rx_time = HAL_GetTick();
@@ -121,13 +158,50 @@ void receive_data() {
 		//SetPosition(&motor_L, speeds[0]);
 		//SetPosition(&motor_R, speeds[1]);
 	}
+#else
+
+	#ifdef READ_SENSOR
+		sensor_read_data();
+		last_rx_time = HAL_GetTick();
+	#endif
+
+	#ifdef INCLUDE_PROTOCOL
+		protocol_run();
+	#endif
+	#ifdef CONTROL_SENSOR
+		#ifdef INCLUDE_PROTOCOL
+			if (protocol_data.sensor_control){
+		#endif
+				if (sensor_get_speeds(&speeds[0], &speeds[1])){
+					Motors_speeds(speeds[0], speeds[1]);
+				} else {
+					Motors_stop();
+				}	
+		#ifdef INCLUDE_PROTOCOL
+			} else {
+
+			}
+		#endif
+
+	#endif
+
+#endif
 }
 
 /* TRANSMIT DATA
  * Send the status byte, as well as the battery voltage if the TX line is free.
  * In DEBUG mode, additional readings are outputted - current readings from the wheel.
  */
+extern int softserialbits;
+extern int softserialchars;
+extern int softserialtime;
+extern unsigned char softseriallastchar;
+
+static int count = 0;
+
+
 void transmit_data() {
+#ifndef SOFTWARE_SERIAL
 	float data_v;
 	data_v = GET_BATTERY_VOLT();
 
@@ -152,6 +226,18 @@ void transmit_data() {
 		Uart_TX((char *)&uart.TX_buffer[0]);
 		last_tx_time = HAL_GetTick();
 	}
+#else
+	#ifdef CONTROL_SENSOR
+		sensor_send_lights();
+		last_tx_time = HAL_GetTick();
+		count++;
+		if (0 == (count % 2000)){
+			//char tmp[40];
+			//sprintf(tmp, "hello %d %d %d %2x\r\n", softserialbits, softserialchars, softserialtime, softseriallastchar);
+			//softwareserial_Send_Wait(tmp, strlen(tmp));
+		}
+	#endif
+#endif
 }
 
 /* Check two power related things:
@@ -180,7 +266,7 @@ void check_power() {
 	 */
 	if (is_charging()) {
 		SET_ERROR_BIT(status, STATUS_IS_CHARGING);
-		Motors_stop();
+		//Motors_stop();
 	} else {
 		CLR_ERROR_BIT(status, STATUS_IS_CHARGING);
 	}

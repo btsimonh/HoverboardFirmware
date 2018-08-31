@@ -7,6 +7,10 @@
 #include "stdio.h"
 #include "string.h"
 #include "constants.h"
+#include "config.h"
+
+
+#ifndef SOFTWARE_SERIAL
 
 /* Private function prototypes -----------------------------------------------*/
 int process_frame(uint8_t start, uint8_t length);
@@ -236,3 +240,4 @@ int process_frame(uint8_t start, uint8_t length) {
 		return 0;
 	}
 }
+#endif

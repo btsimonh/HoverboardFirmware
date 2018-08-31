@@ -95,6 +95,7 @@ void buzzer_long_beep(void){
 
 /************* LED *************/
 void led_init(void){
+#ifdef LED_GPIO
 	GPIO_InitTypeDef GPIO_InitStruct;
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/*Configure GPIO pin Output Level */
@@ -104,14 +105,18 @@ void led_init(void){
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(LED_GPIO_PORT, &GPIO_InitStruct);
+#endif
 }
 
 void led_set(uint8_t state){
+#ifdef LED_GPIO
 	HAL_GPIO_WritePin(LED_GPIO_PORT, LED_PIN, (GPIO_PinState)state);
+#endif
 }
 
 /************* DEBUG PINS *************/
 void debug_pin_init(void){
+#ifdef DEBUG_GPIOB_10_11	
 	GPIO_InitTypeDef GPIO_InitStruct;
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	/*Configure GPIO pin Output Level */
@@ -124,26 +129,35 @@ void debug_pin_init(void){
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	GPIO_InitStruct.Pin = GPIO_PIN_11;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
 }
 
 /* Debug pin 10 is the blue pin on the side with shorter wires.
  * (opposite the UART connections, opposite the speaker).
  */
 void debug_pin_10_ON(void){
+#ifdef DEBUG_GPIOB_10_11	
 	GPIOB->BSRR = GPIO_PIN_10;
+#endif
 }
 
 void debug_pin_10_OFF(void){
+#ifdef DEBUG_GPIOB_10_11	
 	GPIOB->BSRR = 0x04000000;
+#endif
 }
 
 /* Debug pin 11 is the green pin on the side with shorter wires.
  * (opposite the UART connections, opposite the speaker).
  */
 void debug_pin_11_ON(void){
+#ifdef DEBUG_GPIOB_10_11	
 	GPIOB->BSRR = GPIO_PIN_11;
+#endif
 }
 
 void debug_pin_11_OFF(void){
+#ifdef DEBUG_GPIOB_10_11	
 	GPIOB->BSRR = 0x08000000;
+#endif
 }

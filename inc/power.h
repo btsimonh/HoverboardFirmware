@@ -23,6 +23,7 @@ uint8_t is_charging(void);
 void button_init(void);
 uint8_t button_pressed(void);
 void button_toggle(void);
+void set_power_on(int on);
 
 extern void error_handler(void);
 

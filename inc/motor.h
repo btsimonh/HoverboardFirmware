@@ -83,6 +83,13 @@ struct Motor {
 	volatile __IO double ki;
 	volatile __IO double kd;*/
 	volatile __IO double Setpoint;
+
+
+	// used to directly measure posn
+	volatile char hall_last;
+	volatile int hall_posn;
+	volatile unsigned int hall_skips;
+
 };
 
 // PUBLIC

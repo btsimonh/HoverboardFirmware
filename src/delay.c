@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "delay.h"
 
+#ifdef TIM2_DELAY
 TIM_HandleTypeDef TimHandle;
 
 /* Init & start timer for microseconds delays
@@ -66,4 +67,8 @@ void delay_us(uint32_t uSecs) {
 	// stop timer
 	_stop_timer();
 }
-
+#else
+void delay_us(uint32_t uSecs){
+	
+}
+#endif

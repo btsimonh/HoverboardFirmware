@@ -36,6 +36,7 @@
 #include "stm32f1xx_it.h"
 #include "motor.h"
 #include "power.h"
+#include "softwareserial.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -46,6 +47,8 @@ extern struct Motor motor_L;
 extern struct Motor motor_R;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
+TIM_HandleTypeDef softwareserialtimer;
+TIM_HandleTypeDef softwareserialtimerTX;
 
 extern void Speed_ISR_Callback(struct Motor *motor);
 
@@ -222,7 +225,9 @@ void DMA1_Channel6_IRQHandler(void)
 	/* USER CODE BEGIN DMA1_Channel6_IRQn 0 */
 
 	/* USER CODE END DMA1_Channel6_IRQn 0 */
+#ifndef SOFTWARE_SERIAL
 	HAL_DMA_IRQHandler(&hdma_usart2_rx);
+#endif
 	/* USER CODE BEGIN DMA1_Channel6_IRQn 1 */
 
 	/* USER CODE END DMA1_Channel6_IRQn 1 */
@@ -236,7 +241,9 @@ void DMA1_Channel7_IRQHandler(void)
 	/* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
 
 	/* USER CODE END DMA1_Channel7_IRQn 0 */
+#ifndef SOFTWARE_SERIAL
 	HAL_DMA_IRQHandler(&hdma_usart2_tx);
+#endif
 	/* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
 
 	/* USER CODE END DMA1_Channel7_IRQn 1 */
@@ -247,10 +254,25 @@ void DMA1_Channel7_IRQHandler(void)
  */
 void EXTI1_IRQHandler(void)
 {
+#ifndef	CONTROL_THE_POWER
 	button_toggle();
+#endif
 
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
 }
+
+/**
+ * @brief This function handles EXTI line 2 interrupt.
+ */
+void EXTI2_IRQHandler(void)
+{
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
+#ifdef SOFTWARE_SERIAL
+    if (SOFTWARE_SERIAL_RX_PIN == GPIO_PIN_2)
+      softwareserialRXInterrupt();
+#endif
+}
+
 
 /**
  * @brief This function handles EXTI line[15:10] interrupts.
@@ -321,6 +343,47 @@ void TIM4_IRQHandler(void)
 	HAL_TIM_IRQHandler(&(motor_L.setup.htim_speed));
 	Speed_ISR_Callback(&motor_L);
 }
+
+
+void TIM5_IRQHandler(void)
+{
+    if (__HAL_TIM_GET_FLAG(&softwareserialtimerTX, TIM_IT_UPDATE) != RESET){
+        __HAL_TIM_CLEAR_FLAG(&softwareserialtimerTX, TIM_IT_UPDATE);
+    }
+
+    SoftwareSerial_ISR_Callback();
+}
+
+void TIM2_IRQHandler(void)
+{
+    if (__HAL_TIM_GET_FLAG(&softwareserialtimer, TIM_IT_UPDATE) != RESET){
+        __HAL_TIM_CLEAR_FLAG(&softwareserialtimer, TIM_IT_UPDATE);
+    }
+
+    static int count = 0;
+    count++;
+    if (!(count%8)){
+        SoftwareSerial_ISR_Callback();
+    }
+}
+
+
+
+/////////////////////////////////////////
+// UART interrupts
+
+// used to read original sensors - calls into sensorcoms.c
+#ifdef CONTROL_SENSOR
+void USART2_IRQHandler(void){
+    USART_sensor_IRQ(0, USART2);
+}
+
+void USART3_IRQHandler(void){
+    USART_sensor_IRQ(1, USART3);
+}
+#endif
+//
+/////////////////////////////////////////
 
 
 /* USER CODE BEGIN 1 */

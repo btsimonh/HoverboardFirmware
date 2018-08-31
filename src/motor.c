@@ -651,10 +651,31 @@ float motor_Get_Abs_Position(struct Motor *motor){
 	return motor->absposition;
 }
 
+
+
+static const int increments[7][7] =
+{
+    {  0,  0,  0,  0,  0,  0,  0 },
+    {  0,  0,  0, -1,  0,  1,  0 },
+    {  0,  0,  0,  1,  0,  0, -1 },
+    {  0,  1, -1,  0,  0,  0,  0 },
+    {  0,  0,  0,  0,  0, -1,  1 },
+    {  0, -1,  0,  0,  1,  0,  0 },
+    {  0,  0,  1,  0, -1,  0,  0 },
+};
+
 /* This is the interrupt function for whenever the hall sensor readings change.
  */
 void HALL_ISR_Callback(struct Motor *motor){
-	
+	int hall = (motor->setup.HALL_PORT->IDR & (motor->setup.HALL_PINS[0]|motor->setup.HALL_PINS[1]|motor->setup.HALL_PINS[2])) / motor->setup.HALL_PINS[0];
+	if (motor.last_hall > 0){
+		char incr = increments[motor.hall_last][hall];
+		if (incr == 0){
+			motor.hall_skips++;
+		}
+		motor.hall_posn += incr;
+	}
+	motor.hall_last = hall;
 }
 
 /* This is the interrupt function to change the duty cycle 16x per commutation phase.
@@ -691,12 +712,14 @@ void Duty_ISR_Callback(struct Motor *motor){
  */
 void Speed_ISR_Callback(struct Motor *motor){
 	// if no new data in a second, stop!!
+#ifdef NOTHERENOW	
 	if (HAL_GetTick() - last_rx_time > HEARTBEAT_PERIOD) {
 		motor_stop(motor);
 		SET_ERROR_BIT(status, STATUS_HEARTBEAT_MISSING);
 	} else {
 		CLR_ERROR_BIT(status, STATUS_HEARTBEAT_MISSING);
 	}
+#endif	
 
 	//oldhall = motor->position;
 

@@ -34,6 +34,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
 #include "adc.h"
+#include "config.h"
 
 extern struct ADC adc_L;
 extern struct ADC adc_R;
@@ -228,6 +229,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
 
+#ifndef CONTROL_SENSOR
 	GPIO_InitTypeDef GPIO_InitStruct;
 	if(huart->Instance==USART2)
 	{
@@ -289,11 +291,12 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 
 		/* USER CODE END USART2_MspInit 1 */
 	}
-
+#endif
 }
 
 void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 {
+#ifndef CONTROL_SENSOR
 
 	if(huart->Instance==USART2)
 	{
@@ -316,7 +319,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 	/* USER CODE BEGIN USART2_MspDeInit 1 */
 
 	/* USER CODE END USART2_MspDeInit 1 */
-
+#endif
 }
 
 /* USER CODE BEGIN 1 */

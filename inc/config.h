@@ -27,6 +27,7 @@
 */
 #define DEBUG_POSITION //comment out when not in use
 
+
 /* One beep at start
  */
 //#define BUZZER_START_DEBUG //comment out when not in use
@@ -39,7 +40,7 @@
 #define CONTROL_METHOD SINUSOIDAL_CONTROL
 #define SIMPLE_POWER 0
 #define PID_POWER 1
-#define POWER_METHOD PID_POWER
+#define POWER_METHOD SIMPLE_POWER
 
 
 
@@ -89,5 +90,44 @@
 #define TX_WAIT_PERIOD	  50   //250 ms
 #define RX_WAIT_PERIOD    50    //ms
 #define HEARTBEAT_PERIOD  500   //ms
+
+
+/* SOFTWARE SERIAL
+ * allows the used of any pair og GPIOs as a basic UART
+ */
+#define SOFTWARE_SERIAL
+/* note - if you change this pin, the EXTI interrupt needs to change in _it.c and softwareserial.c !!! */
+#define SOFTWARE_SERIAL_RX_PIN GPIO_PIN_2
+#define SOFTWARE_SERIAL_RX_PORT GPIOB
+#define SOFTWARE_SERIAL_TX_PIN GPIO_PIN_9
+#define SOFTWARE_SERIAL_TX_PORT GPIOC
+#define SOFTWARE_SERIAL_BAUD 9600
+
+
+// CONTROL_SENSOR implements control from original sensor boards.
+// the baud rate is 52177 for GD32 baseed YST boards.
+#define READ_SENSOR
+#define CONTROL_SENSOR
+#define CONTROL_SENSOR_BAUD     52177    // control via usart from GD32 based sensor boards @52177 baud
+//#define CONTROL_SENSOR_BAUD     26300    // reported baudrate for other sensor boards?
+
+
+// simple ascii and machine protocol for control, disgnosis and feedback
+#define INCLUDE_PROTOCOL
+
+
+#define CONTROL_THE_POWER
+
+
+
+/* DEBUG PINS 
+ * I can't have these pins used...
+ */
+//#define DEBUG_GPIOB_10_11
+
+/* LED PIN 
+ * I can't have these pins used...
+ */
+//#define LED_GPIO
 
 #endif /* __CONFIG__H */

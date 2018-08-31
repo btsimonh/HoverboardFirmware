@@ -34,7 +34,7 @@ void button_init(void){
 	GPIO_InitStruct.Pin = BUTTON_PIN_IN;
 	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	HAL_GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStruct);
 
 	/*Configure GPIO pin output Level */
@@ -56,4 +56,12 @@ uint8_t button_pressed(void) {
 
 void button_toggle(void){
 	HAL_GPIO_TogglePin(BUTTON_GPIO_PORT, BUTTON_PIN_OUT);
+}
+
+void set_power_on(int on){
+	if (on){
+		HAL_GPIO_WritePin(BUTTON_GPIO_PORT, BUTTON_PIN_OUT, GPIO_PIN_SET);
+	} else {
+		HAL_GPIO_WritePin(BUTTON_GPIO_PORT, BUTTON_PIN_OUT, GPIO_PIN_RESET);
+	}
 }
